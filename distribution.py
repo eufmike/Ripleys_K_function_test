@@ -16,6 +16,7 @@ N = 1000 # sample size
 rdnumber_1 = np.random.rand(N)
 print(rdnumber_1)
 
+#%%
 plt.hist(rdnumber_1, bins=100)
 plt.title('histogram random test 01')
 plt.show()
