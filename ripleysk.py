@@ -5,8 +5,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-%matplotlib inline
-
 #%%
 def PoissonPP(rt, Dx, Dy = None):
     '''
@@ -21,8 +19,8 @@ def PoissonPP(rt, Dx, Dy = None):
     y = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)))
     P = np.hstack((x, y))
     return(P)
-    
-rate, Dx = 0.2, 20
+
+rate, Dx = 0.05, 20
 P = PoissonPP(rate, Dx).T
 plt.figure(figsize=(10,10))
 plt.scatter(P[0], P[1], edgecolor = 'b', facecolor='none', alpha =0.3)
@@ -56,57 +54,47 @@ def ThomasPP(kappa, sigma, mu, Dx):
     pts = [x, y]
     return pts
 
+aa = ThomasPP(kappa=0.05, sigma=0.2, mu=15, Dx=20)
 
-aa = ThomasPP(kappa=3, sigma=0.2, mu=15, Dx=20)
-
-#%%
 plt.figure(figsize=(10,10))
 plt.scatter(aa[0], aa[1], color='b', marker = '.', alpha = 0.2)
 plt.show()
 
 #%%
-# Poisson test
-import scipy.stats
-import matplotlib.pyplot as plt
-
-rt = 0.2
-Dx = 20
-Dy = 20
-N = 80
-print(N)
-# N = scipy.stats.poisson(rt*Dx*Dy).rvs()
-# print(N)
-print(((N, 1)))
-
-# 0, Dx means range, ((N, 1)) means dimentional structure
-x = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1))) 
-y = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)))
-P = np.hstack((x, y))
-P_transpose = P.T
-
-plt.scatter(P_transpose[0], P_transpose[1], edgecolor = 'b', facecolor='none', alpha =0.5)
-plt.show()
-
-print(P)
-#%%
-t_array = P
-# print(t_array)
-
-t = P[0, :2]
-sigma = 0.2
-N = 15
-TP = []
-for j in range(N):
-            # place a point centered on the location of the parent according 
-            # to an isotropuc Gaussuan distribution with sigma variance
-                pdf = scipy.stats.norm(loc = t, scale = (sigma, sigma))
-                # add the child point to the list TP
-                TP.append(list(pdf.rvs(2)))
-
-pts = list(zip(*TP))
-print(pts)
+r_step = 0.1
+RList = np.linspace(0.0, 10.0, num = 101)[1:]
+print(RList)
 
 #%%
-mu = 10
-N = scipy.stats.poisson(mu).rvs()
-print(N)
+count = len(aa[0])
+biglist = np.empty((0, 100))
+# print(biglist)
+
+for i in range(count):
+# for i in range(5):    
+    deltax2 = (aa[0] - aa[0][i])**2
+    deltay2 = (aa[1] - aa[1][i])**2
+    # print(deltax2)
+    # print(deltay2)
+    distance = np.sqrt(deltax2 + deltay2)
+    # print(distance)
+
+    count_i = []
+    for r in RList:        
+        count = sum(distance < r)
+        count_i.append(count / (np.pi * r**2))
+    # print(count_i)
+    
+    biglist = np.append(biglist, np.array([count_i]), axis = 0)
+
+print(biglist)
+
+#%%
+# K(r), L(r), H(r)
+K_r = sum(biglist)/count
+L_r = np.sqrt(K_r/np.pi)
+H_r = L_r - RList
+
+print(K_r)
+print(L_r)
+print(H_r)
