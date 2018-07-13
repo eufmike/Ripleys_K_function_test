@@ -5,7 +5,7 @@
 
 # PoissonPP and ThomasPP are adpated from Connor Johnson's blog post
 # (http://http://connor-johnson.com/2014/02/25/spatial-point-processes/) 
-# 
+# Seed argument for generating random numbers is added. 
 
 import scipy.stats
 import numpy as np
@@ -13,9 +13,14 @@ import matplotlib.pyplot as plt
 
 def PoissonPP(rt, Dx, Dy = None, seed = None):
     '''
-    Determines the number of events 'N' for a rectangular region,
-    given the rate 'rt' and the dimensions, 'Dx', 'Dy'.
+    rt = rate or Poisson distribution
+    Dx, Dy = the dimension of 2D array. 
+    seed = seed variable for random_state in .rvs arguments (default = None)
+    
+    POISSONPP determines the number of events 'N' for a rectangular region,
+    given the rate 'rt', the dimensions, 'Dx', 'Dy', and seed variable.
     Returns a <2xN> NumPy array.
+    
     '''
     
     if Dy == None:
@@ -27,18 +32,26 @@ def PoissonPP(rt, Dx, Dy = None, seed = None):
     else:
         N = scipy.stats.poisson(rt*Dx*Dy).rvs(random_state=seed)
         x = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)), random_state=seed)
-        y = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)), random_state=seed)
+        y = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)), random_state=seed + 1)
+        '''
         print('Dx = {}'.format(Dx))
         print('Dy = {}'.format(Dy))
         print('N = {}'.format(N))
-    
+        '''
     P = np.hstack((x, y))
     return(P)
 
 def ThomasPP(rt, Dx, sigma, mu, seed = None):
     '''
-    each forming a Poisson (mu) numbered cluster of points,
-    having an isotropic Gaussian distribution with variance 'sigma'
+    rt = rate or Poisson distribution
+    Dx, Dy = the dimension of 2D array
+    sigma = the standard deviation of Gaussian distribution surrounding parent points
+    mu = generate the count for each Gaussian distribution following Poisson distribution
+    seed = seed variable for random_state in .rvs arguments (default = None)
+    
+    THOMASPP generates multiple Gaussian distribution surrounding given parents points, 
+    which are created by PoissonPP(). The sample size of Gaussian distribution is determined by 
+    Poisson distribution 'mu', where the variance is determined by 'Sigma'.
     '''
 
     # Create a set of parent points form a Poisson(kappa)
@@ -55,26 +68,25 @@ def ThomasPP(rt, Dx, sigma, mu, seed = None):
     y = []
     # for each parent point
     for i in range(M):
-        # determine a number of children accorfing to a Poisson(mu) distribution    
-        pdf = scipy.stats.norm(loc = parents[i, :2], scale = (sigma, sigma))
+        # determine a number of children accorfing to a Poisson(mu) distribution
+        parent_x = parents[i][0]
+        parent_y = parents[i][1]
+        pdf_x = scipy.stats.norm(loc = parent_x, scale = sigma)
+        pdf_y = scipy.stats.norm(loc = parent_y, scale = sigma)
+        
+        # check if the seed arg exists.
         if seed == None:
             N = scipy.stats.poisson(mu).rvs()
-            XYP = list(pdf.rvs(N * 2))
+            children_x = list(pdf_x.rvs(N))
+            children_y = list(pdf_y.rvs(N))
         else:
-            N = scipy.stats.poisson(mu).rvs(random_state=seed)
-            print('N poisson= {}'.format(N))
-            XYP = list(pdf.rvs(N*2, random_state = seed))
-            print('with seed XYP = {} '.format(XYP))
-            x = x.append(XYP[:N])
-            y = y.appemd(XYP[N:])
-        '''
-        for j in range(N):
-            # place a point centered on the location of the parent according 
-            # to an isotropuc Gaussuan distribution with sigma variance
-                pdf = scipy.stats.norm(loc = parents[i, :2], scale = (sigma, sigma))
-                # add the child point to the list TP
-                TP.append(list(pdf.rvs(2, random_state=seed)))
-        '''
-    x, y = zip(*TP)
+            N = scipy.stats.poisson(mu).rvs(random_state =seed + i)
+            children_x = list(pdf_x.rvs(N, random_state = (seed + i + 1)))
+            children_y = list(pdf_y.rvs(N, random_state = (seed + i + 2)))
+        
+        # concate x y coordinates
+        x = x + children_x
+        y = y + children_y
+
     pts = [x, y]
     return pts
