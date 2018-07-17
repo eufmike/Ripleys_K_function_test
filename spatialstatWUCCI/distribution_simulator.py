@@ -4,8 +4,8 @@
 # From Washington University Center for Cellular Imaging
 
 # PoissonPP and ThomasPP are adpated from Connor Johnson's blog post
-# (http://http://connor-johnson.com/2014/02/25/spatial-point-processes/) 
-# Seed argument for generating random numbers is added. 
+# (http://http://connor-johnson.com/2014/02/25/spatial-point-processes/)
+# The ability for seed control is added for generating random numbers.  
 
 import scipy.stats
 import numpy as np
@@ -19,7 +19,7 @@ def PoissonPP(rt, Dx, Dy = None, seed = None):
     
     POISSONPP determines the number of events 'N' for a rectangular region,
     given the rate 'rt', the dimensions, 'Dx', 'Dy', and seed variable.
-    Returns a <2xN> NumPy array.
+    Returns a <Nx2> NumPy array.
     
     '''
     
@@ -52,6 +52,7 @@ def ThomasPP(rt, Dx, sigma, mu, seed = None):
     THOMASPP generates multiple Gaussian distribution surrounding given parents points, 
     which are created by PoissonPP(). The sample size of Gaussian distribution is determined by 
     Poisson distribution 'mu', where the variance is determined by 'Sigma'.
+    Returns a <Nx2> NumPy array.
     '''
 
     # Create a set of parent points form a Poisson(kappa)
@@ -87,6 +88,48 @@ def ThomasPP(rt, Dx, sigma, mu, seed = None):
         # concate x y coordinates
         x = x + children_x
         y = y + children_y
+    
+    x = np.array([x]).T
+    y = np.array([y]).T
 
-    pts = [x, y]
-    return pts
+    P = np.hstack((x, y))
+    return P
+
+
+def xyroi(xyarray, xmin, xmax, ymin, ymax):
+    '''
+    xyarray: A <Nx2> NumPy array with xy coordinates.
+    xmin, xman: the range in x-axis
+    ymin, ymax: the range in y-axis
+    
+    XYROI crop the dataset by given ranges in x and y axis ('xmin', 'xmax', 
+    'ymin', 'max'), then return a <Nx2> NumPy array. 
+    '''
+    
+    temp_xy = xyarray[(xyarray[:,0] > xmin) & (xyarray[:,0] < xmax) & (xyarray[:,1] > ymin) & (xyarray[:,0] < ymax)]
+    return temp_xy
+
+def xydensity(xyarray, Dx = None, Dy = None):
+    '''
+    xyarray: A <Nx2> NumPy array with xy coordinates.
+    Dx, Dy: the dimension of 2D array (default = None). 
+
+    XYDENSITY return the desity of given xy dataset. When x/y dimensions are specified, 
+    density will be calculated according to the size of given area. Otherwise it returns
+    the density based on the largest square area which covers all xy data point. 
+    XYDENSITY returns density (count/area).
+    '''
+    
+    x = (xyarray[:,0])
+    y = (xyarray[:,1])
+    if (Dy == None) & (Dx == None):
+        area = (abs(max(x)-min(x))) * (abs(max(y)-min(y)))
+        density = xyarray.shape[0] / area
+    elif Dy == None:
+        area = Dx * Dx
+        density = xyarray.shape[0] / area
+    else:
+        area = Dx * Dy
+        density = xyarray.shape[0] / area
+    
+    return density

@@ -1,72 +1,131 @@
+# In distribution_test01, the script generates 
+# 1: a <Nx2> array with Thomas Point Process by using ThomasPP
+# 2: a <Nx2> array with Poisson Point Process by using PoissonPP
+# 3: a <Nx2> array with Poisson-disc Sampling
+
+# Random numbers can be controlled by seeding. 
+# By Chien-cheng Shih (Mike)
+
 #%%
 import os, sys
 import scipy.stats
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
-dir = '/Users/michaelshih/Documents/code/personal_project/Ripleys_K_function_test/'
-os.chdir(dir)
+path = '/Users/michaelshih/Documents/code/personal_project/Ripleys_K_function_test/'
+os.chdir(path)
+outputfolder = 'output'
+outputsubfolder_csv = 'csv'
+outputsubfolder_figure = 'figure'
 
 #%%
 import imp
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 imp.reload(sswdistsim)
 
-# ----------------------------------------------------------------------------
-# make plot
-import seaborn as sns
-# sns.set_style("white")
-# reset style 
-sns.reset_orig()
-
-# set seed for simulation
+#%% 
+# Part 1: generating simulated data points ---------------------------------
+# 1-1 generated a <Nx2> array by ThomasPP
+# creating parent points
 seed = 1219
 
-# define the size of the canvas
+rate = 0.1
+Dx = 20
+P_parent = sswdistsim.PoissonPP(rt = rate, Dx = Dx, seed = seed)
+
+# creating children points
+sigma = 0.3
+mu = 50
+P_children = sswdistsim.ThomasPP(rt = rate, Dx = Dx, 
+                                sigma = sigma, mu = mu, seed = seed)
+# reduce data to region of interest
+xmin = 0 
+xmax = Dx
+ymin = 0
+ymax = Dx
+
+# crop data and calculate density
+P_ThomasPP = sswdistsim.xyroi(P_children, xmin, xmax, ymin, ymax)
+P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP) 
+
+# print(P_ThomasPP.shape[0])
+# print(P_ThomasPP_density)
+
+# save to csv
+filename = 'P_ThomasPP'
+outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.csv')
+df = pd.DataFrame(P_ThomasPP, columns = ['x', 'y']) 
+df.to_csv(outputpath, index = False)
+
+# save metadata
+outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.txt')
+with open(outputpath, 'w') as file: 
+    file.write('Filename: {}.csv\n'.format(filename))
+    file.write('Counts: {}\n'.format(P_ThomasPP.shape[0]))
+    file.write('Density {:.2f} (counts/area)\n'.format(P_ThomasPP_density))
+    file.write('Data range in x-axis: {0} - {1}\n'.format(xmin, xmax))
+    file.write('Data range in y-axis: {0} - {1}\n'.format(ymin, ymax))
+    file.close()
+
+# 1-2 generated a <Nx2> array by PoissonPP
+rate = 5
+Dx = 20
+
+# set data range
+xmin = 0 
+xmax = Dx
+ymin = 0
+ymax = Dx
+
+P_PoissonPP = sswdistsim.PoissonPP(rt = rate, Dx = Dx, seed = seed)
+# calculate density
+P_PoissonPP_density = sswdistsim.xydensity(P_PoissonPP) 
+
+
+# save to csv
+filename = 'P_PoissonPP'
+outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.csv')
+df = pd.DataFrame(P_PoissonPP, columns = ['x', 'y']) 
+df.to_csv(outputpath, index = False)
+
+# save metadata
+outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.txt')
+with open(outputpath, 'w') as file: 
+    file.write('Filename: {}.csv\n'.format(filename))
+    file.write('Counts: {}\n'.format(P_PoissonPP.shape[0]))
+    file.write('Density {:.2f} (counts/area)\n'.format(P_PoissonPP_density))
+    file.write('Data range in x-axis: {0} - {1}\n'.format(xmin, xmax))
+    file.write('Data range in y-axis: {0} - {1}\n'.format(ymin, ymax))
+    file.close()
+
+# 1-3 generated a <Nx2> array by ThomasPP (dispersed)
+
+
+
+#%%
+# Part 2: Ploting ------------------------------------------------------------
+# set figure size
 plt.figure(figsize= (10, 10))
 plotsize_x = 20.0
 plotsize_y = 20.0
 
-# share variable
-rate = 1/5
-Dx = 20
-
-# ----------------------------------
-# plot 1
+# subplot 1
 plot_1 = plt.subplot(221)
-# create simulation
-P = sswdistsim.PoissonPP(rt = rate, Dx = Dx, seed = seed).T
+plot_1.scatter(P_children[:, 0], P_children[:, 1], 
+                color = 'b', edgecolors = 'none', marker = '.', alpha =0.3)
+plot_1.set_title('ThomasPP')
 
-plot_1.scatter(P[0], P[1], edgecolor = 'r', marker = '.', facecolor='none', alpha =0.7)
-plot_1.set_xlim((0, 20))
-plot_1.set_ylim((0, 20))
-
-# ----------------------------------
-# plot 2
+# subplot 2
 plot_2 = plt.subplot(222)
-# create simulation
-sigma = 1
-mu = 50
-P = sswdistsim.ThomasPP(rt = rate, Dx = Dx, sigma = sigma, mu = mu, seed = seed)
+plot_2.scatter(P_PoissonPP[:, 0], P_PoissonPP[:, 1], 
+                color = 'b', edgecolors = 'none', marker = '.', alpha =0.3)
+plot_2.set_title('PoissonPP')
 
-plt.scatter(P[0], P[1], color = 'b', marker = '.', alpha =0.3)
-plot_2.set_xlim((0, 20))
-plot_2.set_ylim((0, 20))
+# save figure
+filename = 'Point Process'
+outputpath = os.path.join(path, outputfolder, outputsubfolder_figure, filename + '.png')
+plt.savefig(outputpath)
 
-# ----------------------------------
 plt.show()
-
-
-#%%
-
-'''
-seed = 1219
-mu = 15
-sigma = 0.3
-i = 0
-pdf = scipy.stats.norm(loc = i, scale = sigma)
-N = scipy.stats.poisson(mu).rvs(random_state=seed)
-XYP = list(pdf.rvs(4, random_state = seed))
-print(XYP)
-'''
