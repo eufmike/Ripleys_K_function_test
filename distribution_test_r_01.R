@@ -20,13 +20,14 @@ png("test.png", width = 10, height= 10, units= "in", res= 300)
 plot(mypattern, xlim = c(0, 20), ylim = c(0, 20))
 dev.off()
 
-result_1 = Lest(mypattern)
+result_1 = Kest(mypattern)
 head(result_1$r)
-plot(result_1)
 r <- result_1$r
-L <- result_1$iso
-L_rr <- L - r
-plot(r, L)
+K <- result_1$iso
+plot(r, K)
+plot(r, sqrt(K/pi))
+plot(r, sqrt(K/pi) - r)
+
 
 result_2 = Lest(mypattern, correction = 'border')
 head(result_2)
