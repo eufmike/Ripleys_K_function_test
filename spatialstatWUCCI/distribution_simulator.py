@@ -106,7 +106,7 @@ def xyroi(xyarray, xmin, xmax, ymin, ymax):
     'ymin', 'max'), then return a <Nx2> NumPy array. 
     '''
     
-    temp_xy = xyarray[(xyarray[:,0] > xmin) & (xyarray[:,0] < xmax) & (xyarray[:,1] > ymin) & (xyarray[:,0] < ymax)]
+    temp_xy = xyarray[(xyarray[:,0] > xmin) & (xyarray[:,0] < xmax) & (xyarray[:,1] > ymin) & (xyarray[:,1] < ymax)]
     return temp_xy
 
 def xydensity(xyarray, Dx = None, Dy = None):

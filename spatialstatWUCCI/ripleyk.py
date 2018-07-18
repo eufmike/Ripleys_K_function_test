@@ -76,7 +76,7 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
 
     # perform clustering analysis 
     K_r = np.sum(countlist, axis = 0) / (pointcount * density)
-    # print(K_r)
+    print(K_r)
   
     print('--------------------------')
     print('Function: {}'.format(function))
