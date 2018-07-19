@@ -32,16 +32,19 @@ import imp
 import spatialstatWUCCI.ripleyk as ripleyk
 imp.reload(ripleyk)
 
+import spatialstatWUCCI.distribution_simulator as sswdistsim
+imp.reload(sswdistsim)
 #%%
 # 1. ThomasPP ------------------------------------------
-P_ThomasPP_ref = sswdistsim.xyroi(P_ThomasPP, 5, 15, 5, 15)
+# P_ThomasPP_center = sswdistsim.xyroi(P_ThomasPP, 5, 15, 5, 15)
+P_ThomasPP_center = sswdistsim.xyroi(P_ThomasPP, 0, 20, 0, 20)
 P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP, Dx = 20) 
 
-K_r, L_r, H_r, RList, densitylist = ripleyk.ripleyk(xyarray = P_ThomasPP, 
-                        xyarrayref = P_ThomasPP_ref,
+K_r, L_r, H_r, RList, densitylist = ripleyk.ripleyk(xyarray = P_ThomasPP_center, 
+                        xyarrayref = P_ThomasPP,
                         function = 'all', 
                         density = P_ThomasPP_density, 
-                        rstart = 0, rend = 2, rstep = 0.1)
+                        rstart = 0, rend = 5, rstep = 0.01)
 
 
 '''
@@ -66,47 +69,23 @@ plot_3.plot(RList, H_r)
 
 #%%
 # 2. PoissonPP ------------------------------------------
-P_PoissonPP_ref = sswdistsim.xyroi(P_PoissonPP, 5, 15, 5, 15)
+import imp
+import spatialstatWUCCI.ripleyk as ripleyk
+imp.reload(ripleyk)
+import spatialstatWUCCI.distribution_simulator as sswdistsim
+imp.reload(sswdistsim)
+
+P_PoissonPP_center = sswdistsim.xyroi(P_PoissonPP, 5, 15, 5, 15)
+print(P_PoissonPP_center)
+
 P_PoissonPP_density = sswdistsim.xydensity(P_PoissonPP, Dx = 20) 
 print(P_PoissonPP_density)
 
-
-K_r, L_r, H_r, RList, countlist = ripleyk.ripleyk(xyarray = P_PoissonPP, 
+K_r, L_r, H_r, RList, countlist = ripleyk.ripleyk(xyarray = P_PoissonPP_center, 
                         xyarrayref = P_PoissonPP,
                         function = 'all', 
                         density = P_PoissonPP_density, 
-                        rstart = 0, rend = 5, rstep = 0.01)
-
-#%%
-print(RList)
-print(K_r)
-print(L_r)
-print(H_r)
-print(countlist)
-
-#%% 
-# plot
-plt.figure(figsize= (10, 10))
-plotsize_x = 20.0
-plotsize_y = 20.0
-
-plot_1 = plt.subplot(221)
-plot_1.plot(RList, K_r)
-plot_2 = plt.subplot(222)
-plot_2.plot(RList, L_r)
-plot_3 = plt.subplot(223)
-plot_3.plot(RList, H_r)
-
-#%%
-# 3. test ------------------------------------------
-P_ThomasPP_ref = sswdistsim.xyroi(P_ThomasPP, 5, 15, 5, 15)
-P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP, Dx = 20) 
-
-K_r, L_r, H_r, RList, densitylist = ripleyk.ripleyk(xyarray = P_ThomasPP, 
-                        xyarrayref = P_ThomasPP,
-                        function = 'all', 
-                        density = P_ThomasPP_density, 
-                        rstart = 0, rend = 5, rstep = 0.1)
+                        rstart = 0, rend = 5, rstep = 0.009765625)
 
 
 '''
@@ -114,7 +93,7 @@ print(RList)
 print(K_r)
 print(L_r)
 print(H_r)
-print(densitylist)
+print(countlist)
 '''
 
 # plot

@@ -1,3 +1,4 @@
+# coding: utf-8
 # The Distribution Simulater is design to create pattern for culsttering
 # analysis. 
 # By Chien-cheng Shih (Mike)
@@ -9,11 +10,10 @@ import matplotlib.pyplot as plt
 
 def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.1, function = 'H_r'):
     '''
-    xyarray: A <Nx2> NumPy array with xy coordinates.
-    
-    function: three types of Ripley’s functions are proposed.
+    xyarray: A <Nx2> NumPy array with xy coordinates
+
+        equation
         
-        equations 
         K_r = 1/n * sum( (counts of target in area(r))/area(r) )
         L_r = sqrt( K_r / pi )
         H_r = L_r - r
@@ -26,7 +26,7 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
     
     density: the average density of points (generally estimated as n/A, 
     where A is the area of the region containing all points)
-    
+
     rstep: the step size of radius (r) in Ripley’s K-function
     rstart, rend: the start and end of r range
     rsize: the length of r list (default = None)
@@ -44,7 +44,7 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
     if rsize == None:        
         RList = np.arange(rstart, rend + rstep, rstep)
     else:
-        RList = np.linspace(rstart, rend, num = rsize+1)  
+        RList = np.linspace(rstart, rend, num = rsize + 1)  
     # create RList_array
     RList_array = np.array([RList])
 
@@ -54,18 +54,27 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
     countlist = np.zeros((pointcount, len(RList)))
     
     for i in range(pointcount):
-    # for i in range(2):   
+    # for i in range(1):   
         # print('i = {}'.format(i))
         # assign ref point
-        refxy = xyarray[i]
+        refxy = xyarray[i, :2]
+        refidx = int(xyarray[i, 2])
+        # print(refxy)
+        # print(refidx)
+        # print(xyarrayref) 
+        # get distance from points to ref point
+        xyarrayref_temp = np.delete(xyarrayref, refidx, 0)  
+        # print(xyarrayref_temp)
 
-        # get distance from points to ref point        
-        deltaxy2 = np.square(xyarrayref - np.array(refxy))
+        deltaxy2 = np.square(xyarrayref_temp - np.array(refxy))
         distance = np.sqrt(deltaxy2[:, 0] + deltaxy2[:, 1])
         
         # compare to RList_array
         distance = np.array([distance]).T
+        # print(distance)
+
         delta = RList_array - distance
+
         # check if the distance bigger than given radius
         check = np.greater(delta, np.array([0]))
         count = np.sum(check, axis = 0)
@@ -75,8 +84,8 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
         countlist[i] = count
 
     # perform clustering analysis 
-    K_r = np.sum(countlist, axis = 0) / (pointcount * density)
-    print(K_r)
+    K_r = np.mean(countlist, axis = 0) / density
+    # print(K_r)
   
     print('--------------------------')
     print('Function: {}'.format(function))
