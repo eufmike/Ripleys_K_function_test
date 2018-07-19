@@ -106,9 +106,24 @@ def xyroi(xyarray, xmin, xmax, ymin, ymax):
     'ymin', 'max'), then return a <Nx2> NumPy array. 
     '''
 
+    temp_xy = xyarray[(xyarray[:,0] > xmin) & (xyarray[:,0] < xmax) & (xyarray[:,1] > ymin) & (xyarray[:,1] < ymax)]
+    return temp_xy
+
+def xyroi_idx(xyarray, xmin, xmax, ymin, ymax):
+    '''
+    xyarray: A <Nx2> NumPy array with xy coordinates.
+    xmin, xman: the range in x-axis
+    ymin, ymax: the range in y-axis
+    
+    XYROI crop the dataset by given ranges in x and y axis ('xmin', 'xmax', 
+    'ymin', 'max'), then return a <Nx3> NumPy array. 
+    
+    The last column is index. 
+
+    '''
+
     idx = xyarray.shape[0]
     idxarray = np.array([range(idx)]).T
-    # print(idxarray)
     xyarray = np.hstack((xyarray, idxarray))
     temp_xy = xyarray[(xyarray[:,0] > xmin) & (xyarray[:,0] < xmax) & (xyarray[:,1] > ymin) & (xyarray[:,1] < ymax)]
     return temp_xy

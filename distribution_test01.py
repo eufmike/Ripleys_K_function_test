@@ -54,7 +54,7 @@ P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP)
 # print(P_ThomasPP_density)
 
 # save to csv
-filename = 'P_ThomasPP'
+filename = 'P_ThomasPP_20'
 outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.csv')
 df = pd.DataFrame(P_ThomasPP, columns = ['x', 'y']) 
 df.to_csv(outputpath, index = False)
@@ -85,7 +85,7 @@ P_PoissonPP_density = sswdistsim.xydensity(P_PoissonPP)
 
 
 # save to csv
-filename = 'P_PoissonPP'
+filename = 'P_PoissonPP_20'
 outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.csv')
 df = pd.DataFrame(P_PoissonPP, columns = ['x', 'y']) 
 df.to_csv(outputpath, index = False)
@@ -124,7 +124,7 @@ plot_2.scatter(P_PoissonPP[:, 0], P_PoissonPP[:, 1],
 plot_2.set_title('PoissonPP')
 
 # save figure
-filename = 'Point Process'
+filename = 'Point_Process_20'
 outputpath = os.path.join(path, outputfolder, outputsubfolder_figure, filename + '.png')
 plt.savefig(outputpath)
 

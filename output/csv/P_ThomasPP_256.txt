@@ -1,0 +1,5 @@
+Filename: P_ThomasPP_256.csv
+Counts: 327028
+Density 4.99 (counts/area)
+Data range in x-axis: 0 - 256
+Data range in y-axis: 0 - 256

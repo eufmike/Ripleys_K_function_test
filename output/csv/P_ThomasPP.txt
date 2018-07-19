@@ -1,5 +1,0 @@
-Filename: P_ThomasPP.csv
-Counts: 1891
-Density 5.51 (counts/area)
-Data range in x-axis: 0 - 20
-Data range in y-axis: 0 - 20

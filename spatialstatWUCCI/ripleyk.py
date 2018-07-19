@@ -7,16 +7,19 @@
 import scipy.stats
 import numpy as np
 import matplotlib.pyplot as plt
+import tqdm
+import time
 
-def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.1, function = 'H_r'):
+def ripleyk(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep = 0.1, function = 'Hest'):
     '''
-    xyarray: A <Nx2> NumPy array with xy coordinates
-
-        equation
+    xyarray: A <Nx2> NumPy array with xy coordinates. 
+    
+    function: 
+        Three functions are built in: Kest, Lest, Hest 
         
-        K_r = 1/n * sum( (counts of target in area(r))/area(r) )
-        L_r = sqrt( K_r / pi )
-        H_r = L_r - r
+        Kest: K(r) = N / area(A) * 1/(N-1) * sum (counts of target in area(r))
+        Lest: L(r) = sqrt( K(r) / pi )
+        Hest: H(r) = L(r) - r
         
         K_r = return a tuple (K_r, RList)
         L_r = return a tuple (L_r, RList)
@@ -34,6 +37,8 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
 
     This function performs Ripley's functions on 2D dataset ('xyarray')
     with given rstep size ('rstep') or sample size rsize' inside given range 'rstart, rend'.
+
+    CAUTION: There is no edge correction implemented with this function. 
     
     ref: Kiskowski, M. A., Hancock, J. F., & Kenworthy, A. K. (2009). On the use of 
     Ripley's K-function and its derivatives to analyze domain size. Biophysical Journal, 
@@ -49,30 +54,23 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
     RList_array = np.array([RList])
 
     # get the length of xyarray
-    pointcount = xyarray.shape[0]
+    pointcount = xyarray_ref.shape[0]
     # create an zeros array
     countlist = np.zeros((pointcount, len(RList)))
     
-    for i in range(pointcount):
-    # for i in range(1):   
-        # print('i = {}'.format(i))
+    for i in tqdm.trange(pointcount):
         # assign ref point
-        refxy = xyarray[i, :2]
-        refidx = int(xyarray[i, 2])
-        # print(refxy)
-        # print(refidx)
-        # print(xyarrayref) 
+        refxy = xyarray_ref[i, :2]
+        refidx = int(xyarray_ref[i, 2])
         # get distance from points to ref point
-        xyarrayref_temp = np.delete(xyarrayref, refidx, 0)  
+        xyarray_all_temp = np.delete(xyarray_all, refidx, 0)  
         # print(xyarrayref_temp)
 
-        deltaxy2 = np.square(xyarrayref_temp - np.array(refxy))
+        deltaxy2 = np.square(xyarray_all_temp - np.array(refxy))
         distance = np.sqrt(deltaxy2[:, 0] + deltaxy2[:, 1])
         
         # compare to RList_array
         distance = np.array([distance]).T
-        # print(distance)
-
         delta = RList_array - distance
 
         # check if the distance bigger than given radius
@@ -85,7 +83,6 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
 
     # perform clustering analysis 
     K_r = np.mean(countlist, axis = 0) / density
-    # print(K_r)
   
     print('--------------------------')
     print('Function: {}'.format(function))
@@ -100,11 +97,11 @@ def ripleyk(xyarray, xyarrayref, rstart, rend, density, rsize = None, rstep = 0.
 
 
     if function != 'all': 
-        if function == 'K_r':
+        if function == 'Kest':
             # Ripley’s K-function
             result = K_r
 
-        elif function == 'L_r':
+        elif function == 'Lest':
             # Besag normalization Ripley’s K-function
             L_r = np.sqrt(K_r/np.pi)
             result = L_r
