@@ -29,8 +29,8 @@ P_PoissonPP = np.array(P_PoissonPP)
 #%%
 # Ripley's K-function ----------------------------------
 import imp
-import spatialstatWUCCI.ripleyk_v2 as ripleyk_v2
-imp.reload(ripleyk_v2)
+import spatialstatWUCCI.ripleyk_v3 as ripleyk_v3
+imp.reload(ripleyk_v3)
 
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 imp.reload(sswdistsim)
@@ -49,7 +49,7 @@ P_ThomasPP_center = sswdistsim.xyroi_idx(P_ThomasPP, xmin, xmax, ymin, ymax)
 P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP, Dx = Dx) 
 
 start = time.time()
-K_r, L_r, H_r, RList, densitylist = ripleyk_v2.ripleyk(xyarray_ref = P_ThomasPP_center, 
+K_r, L_r, H_r, RList, densitylist = ripleyk_v3.ripleyk(xyarray_ref = P_ThomasPP_center, 
                         xyarray_all = P_ThomasPP,
                         function = 'all', 
                         density = P_ThomasPP_density, 
@@ -63,7 +63,7 @@ print(L_r)
 print(H_r)
 print(densitylist)
 '''
-
+# %%
 # plot
 plt.figure(figsize= (10, 10))
 plotsize_x = 20.0

@@ -6,6 +6,7 @@
 
 import scipy.stats
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import tqdm
 import time
@@ -58,6 +59,78 @@ def ripleyk(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep
     # get count of points
     pointcount = xyarray_ref.shape[0]
     
+    # process boundry for each reference point
+    xlimmin = xyarray_ref[:, 0] - rend
+    xlimmax = xyarray_ref[:, 0] + rend
+    ylimmin = xyarray_ref[:, 1] - rend
+    ylimmax = xyarray_ref[:, 1] + rend
+
+    xyarray_all_length = xyarray_all.shape[0]
+
+    pointarray = np.zeros((xyarray_all_length**2, 2))
+    refarray = np.zeros((xyarray_all_length**2, 2))
+
+    countlist_number = []
+    start_line = 0
+    end_line = 0
+    for i in tqdm.trange(pointcount):
+    # for i in tqdm.trange(2):
+        refxy = xyarray_ref[i, :2]
+        refidx = int(xyarray_ref[i, 2])
+        xyarray_all_temp = np.delete(xyarray_all, refidx, 0)
+
+        xyarray_all_temp = sswdistsim.xyroi(xyarray_all_temp, xlimmin[i], xlimmax[i], ylimmin[i], ylimmax[i])   
+        
+        count = len(xyarray_all_temp)
+        countlist_number.append(count)
+
+        refrepeats = np.repeat([refxy], count, axis = 0)
+
+        end_line = end_line + count
+
+        pointarray[start_line:end_line] = xyarray_all_temp
+        refarray[start_line:end_line] = refrepeats
+
+        start_line = start_line + count
+
+    # print(pointarray)
+    # print(refarray)
+
+    mask = np.all(np.equal(pointarray, 0), axis=1)
+    pointarray = pointarray[~mask]
+    mask = np.all(np.equal(refarray, 0), axis=1)
+    refarray = refarray[~mask]
+    
+    # print(pointarray)
+    # print(refarray)
+
+    deltaxy2 = np.square(pointarray - refarray)
+    distance = np.sqrt(deltaxy2[:, 0] + deltaxy2[:, 1])
+    # print(distance)
+    distance = np.array([distance]).T
+    
+    rdelta = RList_array - distance
+    
+    check = np.greater(rdelta, np.array([0]))
+
+    rdelta_df = pd.DataFrame(data = check, columns = RList)
+    
+
+    pointid = np.repeat(range(pointcount), countlist_number)
+    rdelta_df['countlist_#'] = pointid
+    
+    # display(rdelta_df.tail(10))
+
+    rdelta_df_sum = rdelta_df.groupby('countlist_#').sum()
+    # display(rdelta_df_sum)
+    
+    rdelta_array_sum = rdelta_df_sum.values
+    rdelta_array_sum_avg = np.array(rdelta_array_sum.mean(axis = 0))
+    rdelta_array_sum_avg = rdelta_array_sum_avg.T
+    # print(rdelta_array_sum_avg)
+
+    # return ('done', 'done', 'done', 'done', 'done')
+    '''
     # memory preallocation ------------------------------------------
     # create an zeros array
     countlist = np.zeros((pointcount, len(RList)))
@@ -74,27 +147,27 @@ def ripleyk(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep
         xlimmax = refxy[0] + rend
         ylimmin = refxy[1] - rend
         ylimmax = refxy[1] + rend
-
+    
         xyarray_all_temp = sswdistsim.xyroi(xyarray_all_temp, xlimmin, xlimmax, ylimmin, ylimmax)
 
         deltaxy2 = np.square(xyarray_all_temp - np.array(refxy))
         distance = np.sqrt(deltaxy2[:, 0] + deltaxy2[:, 1])
-        
-        # compare to RList_array
-        distance = np.array([distance]).T
-        delta = RList_array - distance
 
-        # check if the distance bigger than given radius
-        check = np.greater(delta, np.array([0]))
-        count = np.sum(check, axis = 0)
-        count = np.array([count])
+    # compare to RList_array
+    distance = np.array([distance]).T
+    delta = RList_array - distance
 
-        # add counts to countlist
-        countlist[i] = count
-        
+    # check if the distance bigger than given radius
+    check = np.greater(delta, np.array([0]))
+    count = np.sum(check, axis = 0)
+    count = np.array([count])
 
+    # add counts to countlist
+    countlist[i] = count
+    '''
+    
     # perform clustering analysis 
-    K_r = np.mean(countlist, axis = 0) / density
+    K_r = rdelta_array_sum_avg / density
   
     print('--------------------------')
     print('Function: {}'.format(function))
@@ -131,5 +204,5 @@ def ripleyk(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep
         H_r = L_r - RList
         print('Done')
         print('--------------------------')
-        return (K_r, L_r, H_r, RList, countlist)
+        return (K_r, L_r, H_r, RList, rdelta_array_sum_avg)
     

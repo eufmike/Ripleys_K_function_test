@@ -71,8 +71,8 @@ plot_3.plot(RList, H_r)
 #%%
 # Ripley's K-function ----------------------------------
 import imp
-import spatialstatWUCCI.ripleyk_v2 as ripleyk_v2
-imp.reload(ripleyk_v2)
+import spatialstatWUCCI.ripleyk_v3 as ripleyk_v3
+imp.reload(ripleyk_v3)
 
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 imp.reload(sswdistsim)
@@ -83,13 +83,13 @@ P_ThomasPP_center = sswdistsim.xyroi_idx(P_ThomasPP, 5, 15, 5, 15)
 P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP, Dx = 20) 
 
 start = time.time()
-K_r, L_r, H_r, RList, densitylist = ripleyk_v2.ripleyk(xyarray_ref = P_ThomasPP_center, 
+K_r, L_r, H_r, RList, densitylist = ripleyk_v3.ripleyk(xyarray_ref = P_ThomasPP_center, 
                         xyarray_all = P_ThomasPP,
                         function = 'all', 
                         density = P_ThomasPP_density, 
                         rstart = 0, rend = 5, rstep = 0.01)
 end = time.time()
-print(end - start)
+print('total time: {}'.format(end - start))
 
 #%%
 print(RList)
