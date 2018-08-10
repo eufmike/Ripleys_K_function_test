@@ -2,12 +2,18 @@
 # %%
 import numpy as np
 x = np.zeros((7, 2))
-y = np.array([[1,2], [3, 4]])
-print(x)
+y = np.array([[1,2], [3, 4], [5, 6], [7, 8]])
 print(y)
-x[1:3] = y
+condlist = [y[:, 0]<3, y[:, 1]>5]
+np.select(condlist, y)
 
-print(x)
+# %%
+x = np.arange(10)
+condlist = [x<3, x>5]
+choicelist = [x, x**2]
+np.select(condlist, choicelist)
+print(condlist)
+print(choicelist)
 
 # %%
 a = [1,2,3]
