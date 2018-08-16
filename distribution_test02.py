@@ -26,6 +26,8 @@ inputpath = os.path.join(path,subfolder, subfolder_type, filename + '.csv')
 P_PoissonPP = pd.read_csv(inputpath)
 P_PoissonPP = np.array(P_PoissonPP)
 
+outputfolder = 'output'
+
 #%%
 # Ripley's K-function ----------------------------------
 import imp
@@ -68,6 +70,10 @@ plot_2 = plt.subplot(222)
 plot_2.plot(RList, L_r)
 plot_3 = plt.subplot(223)
 plot_3.plot(RList, H_r)
+
+outputsubfolder_figure = 'Point_Process_20_testplot'
+outputpath = os.path.join(path, outputfolder, outputsubfolder_figure + '.png')
+plt.savefig(outputpath)
 
 # %%
 # Ripley's K-function ----------------------------------
@@ -112,7 +118,9 @@ plot_2.plot(RList, L_r)
 plot_3 = plt.subplot(223)
 plot_3.plot(RList, H_r)
 
-
+figure_filename = 'Point_Process_20_testplot'
+outputpath = os.path.join(path, outputfolder, outputsubfolder_figure, figure_filename + '.png')
+plt.savefig(outputpath)
 
 
 #%%
