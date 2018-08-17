@@ -115,12 +115,16 @@ plotsize_y = 20.0
 plot_1 = plt.subplot(221)
 plot_1.scatter(P_children[:, 0], P_children[:, 1], 
                 color = 'b', edgecolors = 'none', marker = '.', alpha =0.3)
+plot_1.set_xlim((0, plotsize_x))
+plot_1.set_ylim((0, plotsize_y))
 plot_1.set_title('ThomasPP')
 
 # subplot 2
 plot_2 = plt.subplot(222)
 plot_2.scatter(P_PoissonPP[:, 0], P_PoissonPP[:, 1], 
                 color = 'b', edgecolors = 'none', marker = '.', alpha =0.3)
+plot_2.set_xlim((0, plotsize_x))
+plot_2.set_ylim((0, plotsize_y))
 plot_2.set_title('PoissonPP')
 
 # save figure
