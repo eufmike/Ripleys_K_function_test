@@ -151,4 +151,4 @@ def xydensity(xyarray, Dx = None, Dy = None):
         area = Dx * Dy
         density = xyarray.shape[0] / area
     
-    return density
+    return (density, xyarray.shape[0], area) 

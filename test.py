@@ -1,4 +1,3 @@
-
 # %%
 import numpy as np
 x = np.zeros((7, 2))
@@ -27,3 +26,17 @@ import time
 
 for i in tqdm.trange(100):
     time.sleep(0.02)
+
+# %%
+import random
+x_list = list(range(10))
+print(x_list)
+random.seed(10)
+sample = random.sample(x_list, 5)
+print(sample)
+
+y_list = list(range(30000))
+print(y_list)
+random.seed(10)
+sample = random.sample(y_list, 3000)
+print(sample)
