@@ -26,10 +26,10 @@ P_ThomasPP = pd.read_csv(inputpath)
 P_ThomasPP = np.array(P_ThomasPP)
 
 # %%
-# ripleyk_v5
-# Ripley's K-function ----------------------------------
-import spatialstatWUCCI.ripleyk_v5 as ripleyk_v5
-imp.reload(ripleyk_v5)
+# spest: Ripley's function 
+# ----------------------------------
+import spatialstatWUCCI.spatialpattern as sp
+imp.reload(sp)
 
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 imp.reload(sswdistsim)
@@ -44,7 +44,7 @@ print('Area: {}'.format(area))
 
 # %%
 start = time.time()
-K_r, L_r, H_r, RList, densitylist = ripleyk_v5.ripleyk(xyarray_ref = P_ThomasPP_center, 
+K_r, L_r, H_r, RList, densitylist = sp.spest(xyarray_ref = P_ThomasPP_center, 
                         xyarray_all = P_ThomasPP,
                         function = 'all', 
                         density = P_ThomasPP_density, 
@@ -53,7 +53,7 @@ end = time.time()
 print('processing time: {}'.format(end - start))
 
 filenames.append('P_ThomasPP_20')
-version_list.append('ripleyk_v5')
+version_list.append('spest')
 time_list.append(end - start)
 
 # %%
@@ -67,17 +67,13 @@ plot_1.plot(RList, H_r)
 plt.show
 
 
-
-
 #################################################################
 
-
 # %%
+# localspest: Ripley's function 
 # ----------------------------------
-# localL_v1: multiple r
-# ----------------------------------
-import spatialstatWUCCI.localL_v1 as localL_v1
-imp.reload(localL_v1)
+import spatialstatWUCCI.spatialpattern as sp
+imp.reload(sp)
 
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 imp.reload(sswdistsim)
@@ -99,7 +95,7 @@ P_ThomasPP_center = sswdistsim.xyroi_idx(P_ThomasPP, xmin, xmax, ymin, ymax)
 P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP, Dx = 20) 
 
 start = time.time()
-localK_r, localL_r, localH_r, RList, countlist= localL_v1.localL(xyarray_ref = P_ThomasPP_center, 
+localK_r, localL_r, localH_r, RList, countlist, xyarray_ref= sp.localspest(xyarray_ref = P_ThomasPP_center, 
                     xyarray_all = P_ThomasPP, 
                     square_size = imgsize,
                     rstart = 0, rend = 5, rstep = 0.01)
@@ -108,7 +104,7 @@ end = time.time()
 print('processing time: {}'.format(end - start))
 
 filenames.append('P_ThomasPP_20')
-version_list.append('ripleyk_v2')
+version_list.append('localspest')
 time_list.append(end - start)
 
 
