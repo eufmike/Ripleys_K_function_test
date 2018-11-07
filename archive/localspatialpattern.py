@@ -13,7 +13,7 @@ import imp
 import random
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 
-def localL(xyarray_ref, xyarray_all, square_size,
+def localspest(xyarray_ref, xyarray_all, square_size,
             r = None, rstart = None, rend = None, rsize = None, rstep = 0.1, 
             function = 'localL', downsize = True, downsizesize = 3000):
     '''

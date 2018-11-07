@@ -40,3 +40,14 @@ print(y_list)
 random.seed(10)
 sample = random.sample(y_list, 3000)
 print(sample)
+
+
+# %%
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from colorspacious import cspace_converter
+from collections import OrderedDict
+
+cmaps = OrderedDict()
