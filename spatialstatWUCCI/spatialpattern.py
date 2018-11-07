@@ -13,8 +13,6 @@ import imp
 import random
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 
-# test
-print('done')
 
 # spest: general spatial pattern analysis
 def spest(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep = 0.1, function = 'Hest', downsize = True, downsizesize = 3000):
