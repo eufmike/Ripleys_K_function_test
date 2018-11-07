@@ -14,7 +14,10 @@ import random
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 
 # spest: general spatial pattern analysis
-def spest(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep = 0.1, function = 'Hest', downsize = True, downsizesize = 3000):
+def spest(input_array_ref, input_array_all, rstart, rend, 
+            density, rsize = None, rstep = 0.1, function = 'Hest', 
+            downsize = True, downsizesize = 3000, 
+            seed = 1947):
     '''
     xyarray: A <Nx2> NumPy array with xy coordinates. 
     
@@ -59,32 +62,31 @@ def spest(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep =
     RList_array = np.array([RList])
 
     # get count of points
-    pointcount = xyarray_ref.shape[0]
+    pointcount = input_array_ref.shape[0]
 
-    print(pointcount)
-    print(downsizesize)
-    print(downsize)
     # downsize
     if pointcount > downsizesize:
         if downsize == True:
             random.seed(10)
             downsize_idx = random.sample(list(range(pointcount)), downsizesize)
-            xyarray_ref = xyarray_ref[downsize_idx]
+            input_array_ref = input_array_ref[downsize_idx]
             pointcount = downsizesize
-
 
     # memory preallocation ------------------------------------------
     # create an zeros array
     countlist = np.zeros((pointcount, len(RList)))
 
+    # add index to the input array ------------------------------------------
+    input_array_ref = arrayaddidx(input_array_ref) 
+
     # calculate counts ----------------------------------------------
     for i in tqdm.trange(pointcount):
         # assign ref point
-        refxy = xyarray_ref[i, :2]
-        refidx = int(xyarray_ref[i, 2])
+        refxy = input_array_ref[i, 1:]
+        refidx = int(input_array_ref[i, 0])
 
         # get distance from points to ref point
-        xyarray_all_temp = np.delete(xyarray_all, refidx, 0)
+        xyarray_all_temp = np.delete(input_array_all, refidx, 0)
         
         xlimmin = refxy[0] - rend
         xlimmax = refxy[0] + rend
@@ -92,7 +94,7 @@ def spest(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep =
         ylimmax = refxy[1] + rend
 
         xyarray_all_temp = sswdistsim.xyroi(xyarray_all_temp, xlimmin, xlimmax, ylimmin, ylimmax)
-
+        
         deltaxy2 = np.square(xyarray_all_temp - np.array(refxy))
         distance = np.sqrt(deltaxy2[:, 0] + deltaxy2[:, 1])
         
@@ -106,9 +108,8 @@ def spest(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep =
         count = np.array([count])
 
         # add counts to countlist
-        countlist[i] = count
-        
-
+        countlist[i] = count   
+    
     # perform clustering analysis 
     print(countlist)
     K_r = np.mean(countlist, axis = 0) / density
@@ -152,7 +153,7 @@ def spest(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep =
 
 
 # localspest: local spatial pattern analysis
-def localspest(xyarray_ref, xyarray_all, square_size,
+def localspest(input_array_ref, input_array_all, square_size,
             r = None, rstart = None, rend = None, rsize = None, rstep = 0.1, 
             function = 'localL', downsize = True, downsizesize = 3000):
     '''
@@ -193,8 +194,8 @@ def localspest(xyarray_ref, xyarray_all, square_size,
     # print(RList_array)
     
     # get count of points
-    pointcount = xyarray_ref.shape[0]
-    pointcount_all = xyarray_all.shape[0]
+    pointcount = input_array_ref.shape[0]
+    pointcount_all = input_array_all.shape[0]
 
     print('pointcount: {}'.format(pointcount))
     # print(downsizesize)
@@ -204,7 +205,7 @@ def localspest(xyarray_ref, xyarray_all, square_size,
         if downsize == True:
             random.seed(10)
             downsize_idx = random.sample(list(range(pointcount)), downsizesize)
-            xyarray_ref = xyarray_ref[downsize_idx]
+            input_array_ref = input_array_ref[downsize_idx]
             pointcount = downsizesize
             print('The point count is over {} and the sample will be downsized.'.format(downsizesize))
  
@@ -220,11 +221,11 @@ def localspest(xyarray_ref, xyarray_all, square_size,
     # calculate counts ----------------------------------------------
     for i in tqdm.trange(pointcount):
         # assign ref point
-        refxy = xyarray_ref[i, :2]
-        refidx = int(xyarray_ref[i, 2])
+        refxy = input_array_ref[i, :2]
+        refidx = int(input_array_ref[i, 2])
 
         # get distance from points to ref point
-        xyarray_all_temp = np.delete(xyarray_all, refidx, 0)
+        xyarray_all_temp = np.delete(input_array_all, refidx, 0)
         
         xlimmin = refxy[0] - rend
         xlimmax = refxy[0] + rend
@@ -270,5 +271,39 @@ def localspest(xyarray_ref, xyarray_all, square_size,
     print('Pointcount: {}'.format(pointcount))
     print('--------------------------')
 
-    return (localK_r, localL_r, localH_r, RList, countlist, xyarray_ref)    
+    return (localK_r, localL_r, localH_r, RList, countlist, input_array_ref)    
+    
+# add index to array in the first column, not limited to 2D array
+def arrayaddidx(array):
+    idx = array.shape[0]
+    idxarray = np.array([range(idx)]).T
+    array = np.hstack((idxarray, array))
+    return array
+
+# create countlist
+def countlistgenerator(input_array_ref, input_array_all, rstart, rend, 
+                        density, rsize, size, rstep, 
+                        downsize, downsizesize,
+                        seed):
+    
+    # create radius (RList_array)
+    if rsize == None:        
+        RList = np.arange(rstart, rend + rstep, rstep)
+    else:
+        RList = np.linspace(rstart, rend, num = rsize + 1)  
+    RList_array = np.array([RList])
+
+    # get counts from input_array_ref
+    pointcount = input_array_ref.shape[0]
+    
+    # examine if downsizing is required based on the input cut-off
+    # If downsizng is required, the it overwrites input_array_ref
+    # based on the random selection. 
+    # Seed control is doable.  
+    if pointcount > downsizesize:
+        if downsize == True:
+            random.seed(seed)
+            downsize_idx = random.sample(list(range(pointcount)), downsizesize)
+            input_array_ref = input_array_ref[downsize_idx]
+            pointcount = downsizesize
     

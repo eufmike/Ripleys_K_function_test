@@ -35,7 +35,7 @@ import spatialstatWUCCI.distribution_simulator as sswdistsim
 imp.reload(sswdistsim)
 
 # ThomasPP test --------------------------------------
-P_ThomasPP_center = sswdistsim.xyroi_idx(P_ThomasPP, 5, 15, 5, 15)
+P_ThomasPP_center = sswdistsim.xyroi(P_ThomasPP, 5, 15, 5, 15)
 # P_ThomasPP_center = sswdistsim.xyroi(P_ThomasPP, 0, 20, 0, 20)
 P_ThomasPP_density, count, area = sswdistsim.xydensity(P_ThomasPP, Dx = 20) 
 print('Density: {}'.format(P_ThomasPP_density))
@@ -44,8 +44,8 @@ print('Area: {}'.format(area))
 
 # %%
 start = time.time()
-K_r, L_r, H_r, RList, densitylist = sp.spest(xyarray_ref = P_ThomasPP_center, 
-                        xyarray_all = P_ThomasPP,
+K_r, L_r, H_r, RList, densitylist = sp.spest(input_array_ref = P_ThomasPP_center, 
+                        input_array_all = P_ThomasPP,
                         function = 'all', 
                         density = P_ThomasPP_density, 
                         rstart = 0, rend = 5, rstep = 0.01)
@@ -90,13 +90,13 @@ xmax = Dx - rmax
 ymin = 0 + rmax
 ymax = Dx - rmax
 
-P_ThomasPP_center = sswdistsim.xyroi_idx(P_ThomasPP, xmin, xmax, ymin, ymax)
+P_ThomasPP_center = sswdistsim.xyroi(P_ThomasPP, xmin, xmax, ymin, ymax)
 # P_ThomasPP_center = sswdistsim.xyroi(P_ThomasPP, 0, 20, 0, 20)
 P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP, Dx = 20) 
 
 start = time.time()
-localK_r, localL_r, localH_r, RList, countlist, xyarray_ref= sp.localspest(xyarray_ref = P_ThomasPP_center, 
-                    xyarray_all = P_ThomasPP, 
+localK_r, localL_r, localH_r, RList, countlist, input_array_ref= sp.localspest(input_array_ref = P_ThomasPP_center, 
+                    input_array_all = P_ThomasPP, 
                     square_size = imgsize,
                     rstart = 0, rend = 5, rstep = 0.01)
 
