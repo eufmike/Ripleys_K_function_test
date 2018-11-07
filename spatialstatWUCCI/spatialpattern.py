@@ -13,7 +13,7 @@ import imp
 import random
 import spatialstatWUCCI.distribution_simulator as sswdistsim
 
-print('master')
+
 def ripleyk(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep = 0.1, function = 'Hest', downsize = True, downsizesize = 3000):
     '''
     xyarray: A <Nx2> NumPy array with xy coordinates. 
