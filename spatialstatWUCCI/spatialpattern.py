@@ -16,6 +16,7 @@ import spatialstatWUCCI.distribution_simulator as sswdistsim
 print("test branch _push")
 print("test branch _push 2")
 print("test branch git 3")
+print("test branch git 4")
 # spest: general spatial pattern analysis
 def spest(xyarray_ref, xyarray_all, rstart, rend, density, rsize = None, rstep = 0.1, function = 'Hest', downsize = True, downsizesize = 3000):
     '''
