@@ -1,53 +1,101 @@
-# %%
-import numpy as np
-x = np.zeros((7, 2))
-y = np.array([[1,2], [3, 4], [5, 6], [7, 8]])
-print(y)
-condlist = [y[:, 0]<3, y[:, 1]>5]
-np.select(condlist, y)
-
-# %%
-x = np.arange(10)
-condlist = [x<3, x>5]
-choicelist = [x, x**2]
-np.select(condlist, choicelist)
-print(condlist)
-print(choicelist)
-
-# %%
-a = [1,2,3]
-b = [3,2,1]
-arepeat = np.repeat(a, b)
-print(arepeat)
-# %%
-# import time
-import tqdm
-import time
-
-for i in tqdm.trange(100):
-    time.sleep(0.02)
-
-# %%
-import random
-x_list = list(range(10))
-print(x_list)
-random.seed(10)
-sample = random.sample(x_list, 5)
-print(sample)
-
-y_list = list(range(30000))
-print(y_list)
-random.seed(10)
-sample = random.sample(y_list, 3000)
-print(sample)
-
 
 # %%
 import numpy as np
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib import cm
-from colorspacious import cspace_converter
-from collections import OrderedDict
 
-cmaps = OrderedDict()
+def edgecorrection(r, coor, dimlimit):
+    circle_area = np.pi * np.square(r)
+    
+    print("coor")
+    print(coor)
+    
+    print("dimlimit")
+    print(dimlimit)
+
+    coor = np.array([coor])
+    distance = np.absolute(coor.T - dimlimit)
+    print("distance")
+    print(distance)
+    
+    distance_clip = np.clip(distance/r, -1, 1)
+    print("distance_clip")
+    print(distance_clip)
+
+    arccos = np.arccos(distance_clip)
+    print('arccos')
+    print(arccos)
+
+    theta_in_radian = arccos/np.pi
+    print('theta_in_radian')
+    print(theta_in_radian)
+
+    sector_percentage = theta_in_radian * 2/2
+    sum_arc = np.sum(sector_percentage)
+    print('sum_arc')
+    print(sum_arc)
+    
+    total_proportion = 1 - sum_arc
+    print('total_proportion')
+    print(total_proportion)
+    area_sector = total_proportion * circle_area
+    print('area_sector')
+    print(area_sector)
+
+    
+    # old method
+    area_triangle_1 = np.sin(arccos) * np.square(r)/2
+    print("area_triangle_1:")
+    print(area_triangle_1)
+    
+    # new method
+    # find edge and return a boolean
+    edge_indicator = np.greater(arccos, np.array([[0]]))
+    print('edge_indicator')
+    print(edge_indicator)
+
+    # get distance value
+    distance_tangent = edge_indicator * distance
+    
+    # angel corner
+    
+    
+    
+    # get oneside of triangle area
+    area_triangle_2_1 = np.sin(arccos) * distance_tangent * r/2
+    area_triangle_2_2 = np.sin(arccos) * distance_tangent * r/2
+    print("area_triangle_2_1:")
+    print(area_triangle_2_1)
+    print("area_triangle_2_2:")
+    print(area_triangle_2_2)    
+    
+
+    area_cover = area_sector + np.sum(area_triangle_1)
+    print(area_cover)
+    area_factor = area_cover / circle_area
+    print(area_factor)
+
+    
+    
+
+    return r
+
+dimlimit = np.array([[0, 120], 
+        [0, 120]])
+coor = [10, 5]
+r = 10
+correction_factor = edgecorrection(r, coor, dimlimit)
+
+# %%
+import numpy as np
+result = np.arccos([0.5])
+print(result)
+result = np.degrees(np.arccos([0.5]))
+print(result)
+
+
+result = np.arccos([1])
+print(result)
+# %%
+angle = np.arccos(0.5)
+print(angle)
+result = np.sin(angle) * 1 * 1 / 2 
+print(result)

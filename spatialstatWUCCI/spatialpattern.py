@@ -210,16 +210,16 @@ def countlistgenerator(input_array_ref, input_array_all, rstart, rend,
         refidx = int(input_array_ref[i, 0])
 
         # get distance from points to ref point
-        xyarray_all_temp = np.delete(input_array_all, refidx, 0)
+        input_array_all_temp = np.delete(input_array_all, refidx, 0)
         
         xlimmin = refxy[0] - rend
         xlimmax = refxy[0] + rend
         ylimmin = refxy[1] - rend
         ylimmax = refxy[1] + rend
 
-        xyarray_all_temp = sswdistsim.xyroi(xyarray_all_temp, xlimmin, xlimmax, ylimmin, ylimmax)
+        input_array_all_temp = sswdistsim.xyroi(input_array_all_temp, xlimmin, xlimmax, ylimmin, ylimmax)
         
-        deltaxy2 = np.square(xyarray_all_temp - np.array(refxy))
+        deltaxy2 = np.square(input_array_all_temp - np.array(refxy))
         distance = np.sqrt(deltaxy2[:, 0] + deltaxy2[:, 1])
         
         # compare to RList_array
@@ -240,7 +240,7 @@ def countlistgenerator(input_array_ref, input_array_all, rstart, rend,
 
 # ----------------------------------------------------------------------------
 # spest with edge correction
-def spestedge(input_array, rstart, rend, 
+def spestedge(input_array_ref, input_array_all, rstart, rend, 
             density = None, rsize = None, rstep = 0.1, function = 'Hest', 
             downsize = True, pointsizelimit = 3000, 
             seed = 1947):
@@ -360,7 +360,8 @@ def countlistgeneratoredge(input_array, rstart, rend,
     # ----------------------------------------------------------------------------
     # memory preallocation
     # create an zeros array
-    countlist = np.zeros((pointcountref, len(RList)))
+    pointcountref = input_array_ref.shape[0]
+    pointcountall = input_array_all.shape[0]
     
     # ----------------------------------------------------------------------------
     # add index to the input array
@@ -373,16 +374,16 @@ def countlistgeneratoredge(input_array, rstart, rend,
 
         # get distance from points to ref point
         ## !!!!!!!!!!!!!!!!!!????????????????
-        xyarray_all_temp = np.delete(input_array, refidx, 0)
+        input_array_all_temp = np.delete(input_array, refidx, 0)
         
         xlimmin = refxy[0] - rend
         xlimmax = refxy[0] + rend
         ylimmin = refxy[1] - rend
         ylimmax = refxy[1] + rend
 
-        xyarray_all_temp = sswdistsim.xyroi(xyarray_all_temp, xlimmin, xlimmax, ylimmin, ylimmax)
+        input_array_all_temp = sswdistsim.xyroi(input_array_all_temp, xlimmin, xlimmax, ylimmin, ylimmax)
         
-        deltaxy2 = np.square(xyarray_all_temp - np.array(refxy))
+        deltaxy2 = np.square(input_array_all_temp - np.array(refxy))
         distance = np.sqrt(deltaxy2[:, 0] + deltaxy2[:, 1])
         
         # compare to RList_array
