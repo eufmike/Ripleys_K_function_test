@@ -4,18 +4,23 @@ import numpy as np
 
 def edgecorrection(r, coor, dimlimit):
     circle_area = np.pi * np.square(r)
-    
+    print('circle_area')
+    print(circle_area)
+
     print("coor")
+    coor = np.array([coor])
     print(coor)
     
     print("dimlimit")
     print(dimlimit)
-
-    coor = np.array([coor])
-    distance = np.absolute(coor.T - dimlimit)
+    
+    distance = dimlimit - coor.T
     print("distance")
     print(distance)
+
     
+    
+    '''
     distance_clip = np.clip(distance/r, -1, 1)
     print("distance_clip")
     print(distance_clip)
@@ -75,11 +80,10 @@ def edgecorrection(r, coor, dimlimit):
 
     
     
-
+    '''
     return r
 
-dimlimit = np.array([[0, 120], 
-        [0, 120]])
+dimlimit = np.array([[0, 50], [0, 50]])
 coor = [10, 5]
 r = 10
 correction_factor = edgecorrection(r, coor, dimlimit)
