@@ -11,90 +11,145 @@ import scipy.stats
 import numpy as np
 import matplotlib.pyplot as plt
 
-def PoissonPP(rt, Dx, Dy = None, seed = None):
+def PoissonPP(rt, N = None, ndimension = 2, rangelim = None, seed = None, seedmodifier = 1):
     '''
-    rt = rate or Poisson distribution
-    Dx, Dy = the dimension of 2D array. 
-    seed = seed variable for random_state in .rvs arguments (default = None)
-    
-    POISSONPP determines the number of events 'N' for a rectangular region,
-    given the rate 'rt', the dimensions, 'Dx', 'Dy', and seed variable.
-    Returns a <Nx2> NumPy array.
-    
-    '''
-    
-    if Dy == None:
-        Dy = Dx
-    if seed == None: 
-        N = scipy.stats.poisson(rt*Dx*Dy).rvs()
-        x = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)))
-        y = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)))
-    else:
-        N = scipy.stats.poisson(rt*Dx*Dy).rvs(random_state=seed)
-        x = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)), random_state=seed)
-        y = scipy.stats.uniform.rvs(loc = 0, scale = Dx, size = ((N, 1)), random_state=seed + 1)
-        '''
-        print('Dx = {}'.format(Dx))
-        print('Dy = {}'.format(Dy))
-        print('N = {}'.format(N))
-        '''
-    P = np.hstack((x, y))
-    return(P)
+    rt = rate of Poisson distribution
+    N = force to over write N (default = None)
+    ndimension: the number of dimension (default = 2)
+    rangelim: the limt for each dimension (default = None)
+    seed = seed variable for random_state in .rvs arguments (default = None)
+    seedmodifier = allow the seed value changes when iterating through dimensions (default = 1)
 
-def ThomasPP(rt, Dx, sigma, mu, seed = None):
+    PoissonPP determines the number of events 'N' for a rectangular region,
+    given the rate 'rt', the dimensions. Returns a <N x ndimension > NumPy array. 
+    Rangelim (NumPy array) defines the limit for each dimension. 
+    
+    Format needs to be: 
+    [[x1_min, x1_max], 
+     [x2_min, x2_max],
+     [x3_min, x3_max], ...]]   
+    
+    Randomization can be controled by seed and seedmodifier. 
+    
+    Add-on:
+    For rangelim, if the size of dimension is smaller than 1, which presumably return N as 0,  
+    directly input N is allowed. 
     '''
-    rt = rate or Poisson distribution
-    Dx, Dy = the dimension of 2D array
+    # check the value of rt
+    if not (0 <= rt <= 1): 
+        raise ValueError('error: var "rt" is a value between 0 and 1')
+    
+    # create a default ranage for each dimension if no limits are assigned.
+    if rangelim is None:
+        rangelim = np.zeros([ndimension, 2])
+        rangelim[:, 1] = 20
+
+    # return an error message when the input limits are inconsistent with the given n dimension
+    if rangelim.shape[0] != ndimension:
+        print('ndimension: {}'.format(ndimension))
+        print('reangelim:')
+        print(rangelim)
+        raise ValueError('error: the dimension of array "rangelim" is not consistent with the var "ndimension"')
+        return
+    
+    # create the size of range
+    rangesize = rangelim[:,1] - rangelim[:,0]
+    # create total space
+    rangeprod = np.prod(rangesize, axis = 0)
+    # calculate N based on the given dimension
+    if N == None:
+        if seed == None: 
+            N = scipy.stats.poisson(rt*rangeprod).rvs()
+        else:
+            N = scipy.stats.poisson(rt*rangeprod).rvs(random_state=seed)
+    
+    # <array pre-allocation>
+    # create zero matrix
+    array = np.zeros([N, ndimension])
+    # print(array.shape)
+    seedtmp = seed
+    # create random value for each dimension
+    for i in range(ndimension):
+        if seedtmp == None:
+            tmp_rndvar = scipy.stats.uniform.rvs(loc = 0, scale = rangesize[i], size = N)
+            
+        else:
+            tmp_rndvar = scipy.stats.uniform.rvs(loc = 0, scale = rangesize[i], size = N, random_state = seedtmp)
+            seedtmp += seedmodifier
+
+        tmp_rndvar_offset = rangelim[i][0] + tmp_rndvar
+        
+        # inject the array into pre-allocated array
+        array[:, i] = tmp_rndvar_offset
+
+    return(array)
+
+def ThomasPP(rt, sigma, mu, N = None, ndimension = 2, rangelim = None, seed = None, seedmodifier = 1):
+    '''
+    rt = rate of Poisson distribution
     sigma = the standard deviation of Gaussian distribution surrounding parent points
     mu = generate the count for each Gaussian distribution following Poisson distribution
+    N = force to over write N (default = None)
+    ndimension: the number of dimension (default = 2)
+    rangelim: the limt for each dimension (default = None)
     seed = seed variable for random_state in .rvs arguments (default = None)
+    seedmodifier = allow the seed value changes when iterating through dimensions (default = 1)
     
     THOMASPP generates multiple Gaussian distribution surrounding given parents points, 
     which are created by PoissonPP(). The sample size of Gaussian distribution is determined by 
     Poisson distribution 'mu', where the variance is determined by 'Sigma'.
-    Returns a <Nx2> NumPy array.
+  
     '''
 
-    # Create a set of parent points form a Poisson(kappa)
-    # distribution on the square region [0, Dx] * [0, Dx]
+    # Create a set of parent points form a Poisson
+    array_points_parents = PoissonPP(rt, N, ndimension, rangelim, seed, seedmodifier)
     
-    if seed == None:
-        parents = PoissonPP(rt, Dx)
-    else:    
-        parents = PoissonPP(rt, Dx, seed = seed)
     # M is the number of parents
-    M = parents.shape[0]
-    # an empty list for the Thomas process points
-    x = []
-    y = []
-    # for each parent point
-    for i in range(M):
-        # determine a number of children accorfing to a Poisson(mu) distribution
-        parent_x = parents[i][0]
-        parent_y = parents[i][1]
-        pdf_x = scipy.stats.norm(loc = parent_x, scale = sigma)
-        pdf_y = scipy.stats.norm(loc = parent_y, scale = sigma)
-        
-        # check if the seed arg exists.
-        if seed == None:
-            N = scipy.stats.poisson(mu).rvs()
-            children_x = list(pdf_x.rvs(N))
-            children_y = list(pdf_y.rvs(N))
-        else:
-            N = scipy.stats.poisson(mu).rvs(random_state =seed + i)
-            children_x = list(pdf_x.rvs(N, random_state = (seed + i + 1)))
-            children_y = list(pdf_y.rvs(N, random_state = (seed + i + 2)))
-        
-        # concate x y coordinates
-        x = x + children_x
-        y = y + children_y
+    M = array_points_parents.shape[0]
+    # Create array for random count
+    count_list = []
     
-    x = np.array([x]).T
-    y = np.array([y]).T
+    # Create counts for each parent point
+    seedtmp = seed
+    for i in range(M):
+        # print(seedtmp)
+        if seedtmp == None:
+            child_count = scipy.stats.poisson(mu).rvs()
+        else: 
+            child_count = scipy.stats.poisson(mu).rvs(random_state=seedtmp)
+            seedtmp += seedmodifier
+        count_list.append(child_count)
+    
+    # return total number for the childern points
+    total_count = sum(count_list)
+    # create the index for start and end
+    childern_idx_start = np.concatenate([np.array([0]), np.cumsum(count_list)[0: -1]])
+    childern_ide_end = np.cumsum(count_list)
 
-    P = np.hstack((x, y))
-    return P
-
+    # <array pre-allocation>
+    array_points_childern = np.zeros([total_count, ndimension])
+    
+    seedtmp = seed    
+    for i in range(M):
+        # return the count for the given parent point
+        childern_count = count_list[i]
+        # return the coordinate for the given parent point
+        parent = array_points_parents[i]
+        # <array pre-allocation>
+        array_temp = np.zeros([childern_count, ndimension])      
+        for j in range(ndimension):
+            parent_value = parent[j]
+            if seedtmp == None:
+                pdf = scipy.stats.norm(loc = parent_value, scale = sigma)
+                array_temp[:, j] = list(pdf.rvs(childern_count))
+            else:
+                pdf = scipy.stats.norm(loc = parent_value, scale = sigma)  
+                array_temp[:, j] = list(pdf.rvs(childern_count, random_state = seedtmp))
+                seedtmp += seedmodifier
+        # print(array_temp)
+        array_points_childern[childern_idx_start[i]:childern_ide_end[i], :] = array_temp
+    
+    return(array_points_childern, array_points_parents)
 
 def xyroi(xyarray, xmin, xmax, ymin, ymax):
     '''
