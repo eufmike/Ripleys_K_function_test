@@ -119,13 +119,15 @@ def ThomasPP(rt, sigma, mu, N = None, ndimension = 2, rangelim = None, seed = No
             child_count = scipy.stats.poisson(mu).rvs(random_state=seedtmp)
             seedtmp += seedmodifier
         count_list.append(child_count)
-    
+    # print(count_list)
     # return total number for the childern points
     total_count = sum(count_list)
     # create the index for start and end
     childern_idx_start = np.concatenate([np.array([0]), np.cumsum(count_list)[0: -1]])
+    # print(childern_idx_start)
     childern_ide_end = np.cumsum(count_list)
-
+    # print(childern_ide_end)
+    
     # <array pre-allocation>
     array_points_childern = np.zeros([total_count, ndimension])
     
