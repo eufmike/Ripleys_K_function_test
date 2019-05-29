@@ -206,7 +206,7 @@ def countlistgenerator(input_array_ref, input_array_all, rstart, rend,
 
     for i in tqdm.trange(pointcountref):
         # assign ref point
-        refxy = input_array_ref[i, 1:]
+        refxy = input_array_ref[i, :2]
         refidx = int(input_array_ref[i, 0])
 
         # get distance from points to ref point

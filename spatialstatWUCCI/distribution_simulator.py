@@ -162,7 +162,7 @@ def xyroi(xyarray, xmin, xmax, ymin, ymax):
     XYROI crop the dataset by given ranges in x and y axis ('xmin', 'xmax', 
     'ymin', 'max'), then return a <Nx2> NumPy array. 
     '''
-
+    print(xmin, xmax, ymin, ymax)
     temp_xy = xyarray[(xyarray[:,0] > xmin) & (xyarray[:,0] < xmax) & (xyarray[:,1] > ymin) & (xyarray[:,1] < ymax)]
     return temp_xy
 

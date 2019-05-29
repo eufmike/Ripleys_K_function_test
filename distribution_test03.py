@@ -7,11 +7,15 @@
 # By Chien-cheng Shih (Mike)
 
 #%%
+%autoreload 2
 import os, sys
 import scipy.stats
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.style
+import matplotlib as mpl
+mpl.style.use('default')
 import time
 
 path = '/Users/michaelshih/Documents/code/personal_project/Ripleys_K_function_test/'
@@ -23,7 +27,6 @@ outputsubfolder_figure = 'figure'
 #%%
 import imp
 import spatialstatWUCCI.distribution_simulator as sswdistsim
-imp.reload(sswdistsim)
 
 #%% 
 # Part 1: generating simulated data points ---------------------------------
@@ -33,12 +36,14 @@ seed = 1219
 
 rate = 0.1
 Dx = 256
-P_parent = sswdistsim.PoissonPP(rt = rate, Dx = Dx, seed = seed)
+P_parent = sswdistsim.PoissonPP(rt = rate, seed = seed)
+print(P_parent)
 
+#%%
 # creating children points
 sigma = 0.3
 mu = 50
-P_children = sswdistsim.ThomasPP(rt = rate, Dx = Dx, 
+P_children, P_parent = sswdistsim.ThomasPP(rt = rate,
                                 sigma = sigma, mu = mu, seed = seed)
 # reduce data to region of interest
 xmin = 0 
@@ -46,6 +51,9 @@ xmax = Dx
 ymin = 0
 ymax = Dx
 
+print(P_children)
+
+#%%
 # crop data and calculate density
 P_ThomasPP = sswdistsim.xyroi(P_children, xmin, xmax, ymin, ymax)
 P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP) 
@@ -54,11 +62,12 @@ P_ThomasPP_density = sswdistsim.xydensity(P_ThomasPP)
 # print(P_ThomasPP_density)
 
 # save to csv
-filename = 'P_ThomasPP_256'
+filename = 'P_ThomasPP_20'
 outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.csv')
 df = pd.DataFrame(P_ThomasPP, columns = ['x', 'y']) 
 df.to_csv(outputpath, index = False)
 
+'''
 # save metadata
 outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.txt')
 with open(outputpath, 'w') as file: 
@@ -68,9 +77,10 @@ with open(outputpath, 'w') as file:
     file.write('Data range in x-axis: {0} - {1}\n'.format(xmin, xmax))
     file.write('Data range in y-axis: {0} - {1}\n'.format(ymin, ymax))
     file.close()
-
+'''
+#%%
 # 1-2 generated a <Nx2> array by PoissonPP
-rate = 5
+rate = 1
 Dx = 20
 
 # set data range
@@ -79,17 +89,18 @@ xmax = Dx
 ymin = 0
 ymax = Dx
 
-P_PoissonPP = sswdistsim.PoissonPP(rt = rate, Dx = Dx, seed = seed)
+P_PoissonPP = sswdistsim.PoissonPP(rt = rate, seed = seed)
 # calculate density
 P_PoissonPP_density = sswdistsim.xydensity(P_PoissonPP) 
 
 
 # save to csv
-filename = 'P_PoissonPP_256'
+filename = 'P_PoissonPP_20'
 outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.csv')
 df = pd.DataFrame(P_PoissonPP, columns = ['x', 'y']) 
 df.to_csv(outputpath, index = False)
 
+'''
 # save metadata
 outputpath = os.path.join(path, outputfolder, outputsubfolder_csv, filename + '.txt')
 with open(outputpath, 'w') as file: 
@@ -99,7 +110,7 @@ with open(outputpath, 'w') as file:
     file.write('Data range in x-axis: {0} - {1}\n'.format(xmin, xmax))
     file.write('Data range in y-axis: {0} - {1}\n'.format(ymin, ymax))
     file.close()
-
+'''
 # 1-3 generated a <Nx2> array by ThomasPP (dispersed)
 
 
@@ -116,16 +127,22 @@ plot_1 = plt.subplot(221)
 plot_1.scatter(P_children[:, 0], P_children[:, 1], 
                 color = 'b', edgecolors = 'none', marker = '.', alpha =0.3)
 plot_1.set_title('ThomasPP')
+plot_1.set_xlim([0,20])
+plot_1.set_ylim([0,20])
 
 # subplot 2
 plot_2 = plt.subplot(222)
 plot_2.scatter(P_PoissonPP[:, 0], P_PoissonPP[:, 1], 
                 color = 'b', edgecolors = 'none', marker = '.', alpha =0.3)
 plot_2.set_title('PoissonPP')
+plot_2.set_xlim([0,20])
+plot_2.set_ylim([0,20])
 
 # save figure
-filename = 'Point_Process_256'
+filename = 'Point_Process_20'
 outputpath = os.path.join(path, outputfolder, outputsubfolder_figure, filename + '.png')
 plt.savefig(outputpath)
 
 plt.show()
+
+#%%
